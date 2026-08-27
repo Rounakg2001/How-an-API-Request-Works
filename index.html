@@ -434,15 +434,44 @@ body {
 
 /* MOBILE */
 
-@media(max-width:600px) {
+@media (max-width: 600px) {
 
+    .reel {
+        min-height: 100vh;
+    }
+
+    .header {
+        top: 3%;
+        padding: 0 15px;
+    }
+
+    .header h1 {
+        font-size: 26px;
+    }
+
+    .header p {
+        font-size: 13px;
+        margin-top: 8px;
+    }
+
+    .flow {
+        top: 18%;
+        width: 100%;
+        height: 62%;
+        left: 0;
+        transform: none;
+    }
+
+    /* ALL NODES */
     .node {
-        width: 125px;
-        height: 105px;
+        width: 120px;
+        height: 95px;
+        border-radius: 18px;
     }
 
     .icon {
-        font-size: 30px;
+        font-size: 28px;
+        margin-bottom: 5px;
     }
 
     .node h2 {
@@ -450,34 +479,100 @@ body {
     }
 
     .node small {
-        font-size: 9px;
+        font-size: 8px;
+        margin-top: 4px;
     }
 
+    /* FRONTEND */
+    .frontend {
+        top: 2%;
+        left: 5%;
+    }
+
+    /* SERVER */
+    .server {
+        top: 42%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* DATABASE */
+    .database {
+        right: 5%;
+        bottom: 2%;
+    }
+
+    /* ACTIVE SERVER */
+    .server.active {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .frontend.active,
+    .database.active {
+        transform: scale(1.05);
+    }
+
+    /* CONNECTION LINES */
     .line-1 {
-        width: 54%;
-        top: 18%;
-        left: 17%;
-        transform: rotate(39deg);
+        width: 46%;
+        top: 20%;
+        left: 20%;
+        transform: rotate(38deg);
     }
 
     .line-2 {
-        width: 54%;
-        bottom: 20%;
-        left: 48%;
-        transform: rotate(141deg);
+        width: 46%;
+        bottom: 21%;
+        left: 50%;
+        transform: rotate(142deg);
     }
 
+    /* DIALOGUE */
     .dialogue {
-        font-size: 11px;
-        padding: 8px 10px;
-        max-width: 150px;
-    }
-
-    .packet {
         font-size: 10px;
         padding: 7px 9px;
+        max-width: 140px;
     }
 
+    .frontend-talk {
+        top: -50px;
+        left: 2%;
+    }
+
+    .server-talk {
+        top: 12%;
+        left: 50%;
+    }
+
+    .database-talk {
+        right: 2%;
+        bottom: 105px;
+    }
+
+    /* PACKET */
+    .packet {
+        font-size: 9px;
+        padding: 7px 9px;
+        max-width: 150px;
+        white-space: normal;
+        text-align: center;
+    }
+
+    /* STATUS */
+    .status {
+        bottom: 5%;
+        padding: 0 15px;
+    }
+
+    .message {
+        font-size: 17px;
+        min-height: 35px;
+    }
+
+    .progress {
+        width: 85%;
+        margin-top: 12px;
+    }
 }
 </style>
 </head>
