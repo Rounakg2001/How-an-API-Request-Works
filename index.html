@@ -438,7 +438,10 @@ body {
 
     .reel {
         min-height: 100vh;
+        height: 100svh;
     }
+
+    /* HEADER */
 
     .header {
         top: 3%;
@@ -447,22 +450,59 @@ body {
 
     .header h1 {
         font-size: 26px;
+        line-height: 1.25;
     }
 
     .header p {
         font-size: 13px;
-        margin-top: 8px;
+        margin-top: 10px;
     }
 
-    .flow {
-        top: 18%;
+
+    /* STATUS BELOW HEADER */
+
+    .status {
+        top: 17%;
+        bottom: auto;
+
+        left: 50%;
+        transform: translateX(-50%);
+
+        width: 82%;
+        padding: 0;
+
+        text-align: left;
+        z-index: 50;
+    }
+
+    .message {
+        font-size: 17px;
+        min-height: auto;
+        margin-bottom: 16px;
+    }
+
+    .progress {
         width: 100%;
-        height: 62%;
+        height: 6px;
+        margin: 0;
+    }
+
+
+    /* FLOW AREA - PUSHED DOWN */
+
+    .flow {
+        top: 29%;
         left: 0;
+
+        width: 100%;
+        height: 58%;
+
         transform: none;
     }
 
+
     /* ALL NODES */
+
     .node {
         width: 120px;
         height: 95px;
@@ -483,26 +523,34 @@ body {
         margin-top: 4px;
     }
 
+
     /* FRONTEND */
+
     .frontend {
         top: 2%;
         left: 5%;
     }
 
+
     /* SERVER */
+
     .server {
         top: 42%;
         left: 50%;
         transform: translate(-50%, -50%);
     }
 
+
     /* DATABASE */
+
     .database {
         right: 5%;
         bottom: 2%;
     }
 
-    /* ACTIVE SERVER */
+
+    /* ACTIVE STATES */
+
     .server.active {
         transform: translate(-50%, -50%) scale(1.05);
     }
@@ -512,7 +560,9 @@ body {
         transform: scale(1.05);
     }
 
+
     /* CONNECTION LINES */
+
     .line-1 {
         width: 46%;
         top: 20%;
@@ -527,7 +577,9 @@ body {
         transform: rotate(142deg);
     }
 
-    /* DIALOGUE */
+
+    /* DIALOGUES */
+
     .dialogue {
         font-size: 10px;
         padding: 7px 9px;
@@ -549,7 +601,9 @@ body {
         bottom: 105px;
     }
 
+
     /* PACKET */
+
     .packet {
         font-size: 9px;
         padding: 7px 9px;
@@ -557,23 +611,58 @@ body {
         white-space: normal;
         text-align: center;
     }
-
-    /* STATUS */
-    .status {
-        bottom: 5%;
-        padding: 0 15px;
-    }
-
-    .message {
-        font-size: 17px;
-        min-height: 35px;
-    }
-
-    .progress {
-        width: 85%;
-        margin-top: 12px;
-    }
 }
+
+/* STATUS - BELOW HEADER */
+
+.status {
+    position: absolute;
+    top: 17%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: min(500px, 80%);
+    text-align: left;
+
+    z-index: 10;
+}
+
+.message {
+    min-height: auto;
+    font-size: clamp(17px, 2vw, 27px);
+    font-weight: bold;
+    color: #f1f1f1;
+
+    margin-bottom: 25px;
+}
+
+.progress {
+    width: 100%;
+    height: 6px;
+
+    margin: 0;
+
+    background: rgba(255,255,255,.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress span {
+    display: block;
+    width: 0%;
+    height: 100%;
+
+    background: linear-gradient(
+        90deg,
+        #00d9ff,
+        #5b8cff,
+        #8b5cf6
+    );
+
+    border-radius: 10px;
+    transition: width .5s ease;
+}
+
 </style>
 </head>
 
@@ -584,6 +673,18 @@ body {
     <div class="header">
         <h1>How an API Request Works 😂🌐</h1>
         <p>Let's see what happens behind the scenes...</p>
+    </div>
+
+    <div class="status">
+
+        <div class="message" id="message">
+            Ready...
+        </div>
+
+        <div class="progress">
+            <span id="progressBar"></span>
+        </div>
+
     </div>
 
     <div class="flow">
@@ -644,17 +745,7 @@ body {
     </div>
 
 
-    <div class="status">
-
-        <div class="message" id="message">
-            Ready...
-        </div>
-
-        <div class="progress">
-            <span id="progressBar"></span>
-        </div>
-
-    </div>
+    
 
 
     <!-- ERROR -->
