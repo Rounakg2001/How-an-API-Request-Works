@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>How an API Request Works 😂</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #07111f;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.reel {
+    width: 100vw;
+    height: 100vh;
+    min-height: 700px;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 20%, rgba(0,180,255,.16), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(130,60,255,.14), transparent 35%),
+        #07111f;
+}
+
+.reel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 35px 35px;
+}
+
+/* HEADER */
+
+.header {
+    position: absolute;
+    top: 5%;
+    width: 100%;
+    text-align: center;
+    z-index: 5;
+}
+
+.header h1 {
+    font-size: clamp(28px, 4vw, 56px);
+}
+
+.header p {
+    margin-top: 10px;
+    color: #8da2b8;
+}
+
+/* FLOW AREA */
+
+.flow {
+    position: absolute;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(900px, 88%);
+    height: 58%;
+}
+
+/* NODES */
+
+.node {
+    position: absolute;
+    width: 180px;
+    height: 130px;
+    border-radius: 24px;
+
+    background: rgba(15,30,48,.95);
+    border: 1px solid rgba(255,255,255,.12);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+
+    transition: .35s;
+    z-index: 3;
+}
+
+.node.active {
+    border-color: #00d9ff;
+    box-shadow:
+        0 0 25px rgba(0,217,255,.65),
+        0 20px 50px rgba(0,0,0,.35);
+}
+
+.frontend.active,
+.database.active {
+    transform: scale(1.08);
+}
+
+.server.active {
+    transform: translate(-50%, -50%) scale(1.08);
+}
+
+.icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.node h2 {
+    font-size: 18px;
+}
+
+.node small {
+    margin-top: 6px;
+    color: #8192a6;
+}
+
+/* POSITIONS */
+
+.frontend {
+    top: 0;
+    left: 0;
+}
+
+.server {
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.database {
+    right: 0;
+    bottom: 0;
+}
+
+/* CONNECTIONS */
+
+.line {
+    position: absolute;
+    height: 3px;
+    border-radius: 10px;
+    background: rgba(0,217,255,.25);
+    transform-origin: left center;
+}
+
+.line-1 {
+    width: 48%;
+    top: 22%;
+    left: 16%;
+    transform: rotate(30deg);
+}
+
+.line-2 {
+    width: 48%;
+    bottom: 23%;
+    left: 50%;
+    transform: rotate(150deg);
+}
+
+/* DIALOGUE */
+
+.dialogue {
+    position: absolute;
+
+    max-width: 230px;
+    padding: 10px 14px;
+
+    background: white;
+    color: #07111f;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    text-align: center;
+
+    opacity: 0;
+    transform: scale(.7);
+
+    transition: .35s;
+
+    z-index: 20;
+}
+
+.dialogue.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.frontend-talk {
+    top: -65px;
+    left: 0;
+}
+
+.server-talk {
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%) scale(.7);
+}
+
+.server-talk.show {
+    transform: translateX(-50%) scale(1);
+}
+
+.database-talk {
+    right: 0;
+    bottom: 140px;
+}
+
+/* PACKET */
+
+.packet {
+    position: absolute;
+
+    padding: 10px 15px;
+
+    border-radius: 12px;
+
+    font-weight: bold;
+    font-size: 13px;
+
+    color: #061019;
+
+    opacity: 0;
+
+    white-space: nowrap;
+
+    z-index: 30;
+
+    box-shadow: 0 0 25px currentColor;
+}
+
+/* STATUS */
+
+.status {
+    position: absolute;
+
+    bottom: 9%;
+
+    width: 100%;
+
+    text-align: center;
+
+    z-index: 10;
+}
+
+.message {
+    min-height: 40px;
+    font-size: clamp(17px, 2vw, 27px);
+    font-weight: bold;
+}
+
+.progress {
+    width: min(500px, 80%);
+    height: 6px;
+
+    margin: 16px auto 0;
+
+    background: rgba(255,255,255,.08);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.progress span {
+    display: block;
+
+    width: 0%;
+    height: 100%;
+
+    background: linear-gradient(90deg,#00d9ff,#8b5cf6);
+
+    transition: width .5s;
+}
+
+/* SEARCH EFFECT */
+
+.searching {
+    animation: searching .7s infinite alternate;
+}
+
+@keyframes searching {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.08) rotate(-2deg);
+    }
+}
+
+/* SHAKE */
+
+.shake {
+    animation: shake .45s;
+}
+
+@keyframes shake {
+
+    0%,100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-12px);
+    }
+
+    40% {
+        transform: translateX(12px);
+    }
+
+    60% {
+        transform: translateX(-8px);
+    }
+
+    80% {
+        transform: translateX(8px);
+    }
+
+}
+
+/* ERROR SCREEN */
+
+.error-screen {
+
+    position: absolute;
+    inset: 0;
+
+    background: rgba(90,0,0,.96);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: .25s;
+
+    z-index: 100;
+}
+
+.error-screen.show {
+    opacity: 1;
+}
+
+.error-screen h2 {
+    font-size: clamp(35px,6vw,80px);
+}
+
+.error-screen p {
+    margin-top: 20px;
+    font-size: clamp(18px,3vw,30px);
+}
+
+/* FINAL */
+
+.final-screen {
+
+    position: absolute;
+    inset: 0;
+
+    background: rgba(7,17,31,.97);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: .6s;
+
+    z-index: 90;
+}
+
+.final-screen.show {
+    opacity: 1;
+}
+
+.final-screen h2 {
+    font-size: clamp(34px,6vw,70px);
+    margin-bottom: 20px;
+}
+
+.formula {
+    color: #00d9ff;
+
+    font-size: clamp(18px,3vw,34px);
+
+    margin-bottom: 45px;
+}
+
+.brand {
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.brand span {
+    color: #a855f7;
+}
+
+.tagline {
+    margin-top: 10px;
+
+    color: #8192a6;
+
+    font-size: 12px;
+
+    letter-spacing: 3px;
+}
+
+/* MOBILE */
+
+@media(max-width:600px) {
+
+    .node {
+        width: 125px;
+        height: 105px;
+    }
+
+    .icon {
+        font-size: 30px;
+    }
+
+    .node h2 {
+        font-size: 13px;
+    }
+
+    .node small {
+        font-size: 9px;
+    }
+
+    .line-1 {
+        width: 54%;
+        top: 18%;
+        left: 17%;
+        transform: rotate(39deg);
+    }
+
+    .line-2 {
+        width: 54%;
+        bottom: 20%;
+        left: 48%;
+        transform: rotate(141deg);
+    }
+
+    .dialogue {
+        font-size: 11px;
+        padding: 8px 10px;
+        max-width: 150px;
+    }
+
+    .packet {
+        font-size: 10px;
+        padding: 7px 9px;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="reel">
+
+    <div class="header">
+        <h1>How an API Request Works 😂🌐</h1>
+        <p>Let's see what happens behind the scenes...</p>
+    </div>
+
+    <div class="flow">
+
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+
+        <!-- DIALOGUES -->
+
+        <div class="dialogue frontend-talk" id="frontendTalk"></div>
+
+        <div class="dialogue server-talk" id="serverTalk"></div>
+
+        <div class="dialogue database-talk" id="databaseTalk"></div>
+
+
+        <!-- FRONTEND -->
+
+        <div class="node frontend" id="frontend">
+
+            <div class="icon">💻</div>
+
+            <h2>Frontend</h2>
+
+            <small>Browser / App</small>
+
+        </div>
+
+
+        <!-- SERVER -->
+
+        <div class="node server" id="server">
+
+            <div class="icon">⚙️</div>
+
+            <h2>API Server</h2>
+
+            <small>Middleman 😮‍💨</small>
+
+        </div>
+
+
+        <!-- DATABASE -->
+
+        <div class="node database" id="database">
+
+            <div class="icon">🗄️</div>
+
+            <h2>Database</h2>
+
+            <small>Data Warehouse</small>
+
+        </div>
+
+
+        <div class="packet" id="packet"></div>
+
+    </div>
+
+
+    <div class="status">
+
+        <div class="message" id="message">
+            Ready...
+        </div>
+
+        <div class="progress">
+            <span id="progressBar"></span>
+        </div>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    <div class="error-screen" id="errorScreen">
+
+        <h2>💥 500 ERROR 💥</h2>
+
+        <p>Developer: "But it was working!" 😭</p>
+
+    </div>
+
+
+    <!-- FINAL -->
+
+    <div class="final-screen" id="finalScreen">
+
+        <h2>That's Basically an API 😂</h2>
+
+        <div class="formula">
+
+            Request → Server → Database → Server → Response
+
+        </div>
+
+        <div class="brand">
+
+            Reeon <span>DevLab</span>
+
+        </div>
+
+        <div class="tagline">
+
+            CODE · DEBUG · SOLVE · REPEAT
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const frontend = document.getElementById("frontend");
+const server = document.getElementById("server");
+const database = document.getElementById("database");
+
+const frontendTalk = document.getElementById("frontendTalk");
+const serverTalk = document.getElementById("serverTalk");
+const databaseTalk = document.getElementById("databaseTalk");
+
+const packet = document.getElementById("packet");
+
+const message = document.getElementById("message");
+
+const progressBar = document.getElementById("progressBar");
+
+const errorScreen = document.getElementById("errorScreen");
+
+const finalScreen = document.getElementById("finalScreen");
+
+
+const sleep = ms =>
+    new Promise(resolve => setTimeout(resolve, ms));
+
+
+function hideTalks() {
+
+    frontendTalk.classList.remove("show");
+
+    serverTalk.classList.remove("show");
+
+    databaseTalk.classList.remove("show");
+
+}
+
+
+function talk(element, text) {
+
+    hideTalks();
+
+    element.textContent = text;
+
+    element.classList.add("show");
+
+}
+
+
+function reset() {
+
+    frontend.classList.remove("active");
+
+    server.classList.remove("active");
+
+    database.classList.remove("active");
+
+    database.classList.remove("searching");
+
+    frontend.classList.remove("shake");
+
+    server.classList.remove("shake");
+
+    database.classList.remove("shake");
+
+    hideTalks();
+
+}
+
+
+async function movePacket(text, from, to, color) {
+
+    packet.textContent = text;
+
+    packet.style.background = color;
+
+    packet.style.opacity = "1";
+
+    const fromRect = from.getBoundingClientRect();
+
+    const toRect = to.getBoundingClientRect();
+
+    const parentRect =
+        document.querySelector(".reel").getBoundingClientRect();
+
+
+    const startX =
+        fromRect.left -
+        parentRect.left +
+        fromRect.width / 2;
+
+
+    const startY =
+        fromRect.top -
+        parentRect.top +
+        fromRect.height / 2;
+
+
+    const endX =
+        toRect.left -
+        parentRect.left +
+        toRect.width / 2;
+
+
+    const endY =
+        toRect.top -
+        parentRect.top +
+        toRect.height / 2;
+
+
+    packet.style.transition = "none";
+
+    packet.style.left = startX + "px";
+
+    packet.style.top = startY + "px";
+
+    packet.style.transform =
+        "translate(-50%, -50%)";
+
+
+    await sleep(250);
+
+
+    packet.style.transition =
+        "left 1.2s ease-in-out, top 1.2s ease-in-out";
+
+
+    packet.style.left = endX + "px";
+
+    packet.style.top = endY + "px";
+
+
+    await sleep(1300);
+
+
+    packet.style.opacity = "0";
+
+}
+
+
+async function startAnimation() {
+
+    reset();
+
+    errorScreen.classList.remove("show");
+
+    finalScreen.classList.remove("show");
+
+    progressBar.style.width = "0%";
+
+
+    await sleep(800);
+
+
+    /* STEP 1 */
+
+    frontend.classList.add("active");
+
+    talk(
+        frontendTalk,
+        "Oi API! Users gula dao! 👀"
+    );
+
+    message.textContent =
+        "Frontend wants some data 😎";
+
+    progressBar.style.width = "20%";
+
+
+    await movePacket(
+
+        "GET /api/users 📦",
+
+        frontend,
+
+        server,
+
+        "#00d9ff"
+
+    );
+
+
+    frontend.classList.remove("active");
+
+    server.classList.add("active");
+
+
+    /* STEP 2 */
+
+    talk(
+        serverTalk,
+        "Arrey bhai! Amar kache nai... DB-ke jiggesh kori 😮‍💨"
+    );
+
+    message.textContent =
+        "Server is asking Database...";
+
+    progressBar.style.width = "40%";
+
+
+    await sleep(1000);
+
+
+    /* STEP 3 */
+
+    await movePacket(
+
+        "SELECT * FROM users 🔍",
+
+        server,
+
+        database,
+
+        "#a855f7"
+
+    );
+
+
+    server.classList.remove("active");
+
+    database.classList.add("active");
+
+    database.classList.add("searching");
+
+
+    talk(
+        databaseTalk,
+        "Again?! 😑 Thik ache... dekhi!"
+    );
+
+    message.textContent =
+        "Database is searching... 🔍";
+
+
+    progressBar.style.width = "60%";
+
+
+    await sleep(1500);
+
+
+    talk(
+        databaseTalk,
+        "Peye gechi! Finally 😂"
+    );
+
+
+    database.classList.remove("searching");
+
+
+    /* STEP 4 */
+
+    await movePacket(
+
+        '{"id":1,"name":"John"} 🎉',
+
+        database,
+
+        server,
+
+        "#22c55e"
+
+    );
+
+
+    database.classList.remove("active");
+
+    server.classList.add("active");
+
+
+    talk(
+        serverTalk,
+        "Aha! Data peye gechi 😎"
+    );
+
+
+    message.textContent =
+        "Server got the data!";
+
+
+    progressBar.style.width = "80%";
+
+
+    await sleep(700);
+
+
+    /* STEP 5 */
+
+    await movePacket(
+
+        "200 OK + JSON 🚀",
+
+        server,
+
+        frontend,
+
+        "#f59e0b"
+
+    );
+
+
+    server.classList.remove("active");
+
+    frontend.classList.add("active");
+
+
+    talk(
+        frontendTalk,
+        "Finally! Thanks bro 😂"
+    );
+
+
+    message.textContent =
+        "Data received successfully! 🎉";
+
+
+    progressBar.style.width = "100%";
+
+
+    await sleep(1200);
+
+
+    /* FAKE ERROR TWIST */
+
+    hideTalks();
+
+    frontend.classList.add("shake");
+
+    server.classList.add("shake");
+
+    database.classList.add("shake");
+
+
+    await sleep(400);
+
+
+    errorScreen.classList.add("show");
+
+
+    await sleep(1400);
+
+
+    errorScreen.classList.remove("show");
+
+
+    reset();
+
+
+    message.textContent =
+        "Relax... Just kidding 😏";
+
+
+    await sleep(1200);
+
+
+    /* FINAL */
+
+    finalScreen.classList.add("show");
+
+
+    await sleep(4500);
+
+
+    startAnimation();
+
+}
+
+
+startAnimation();
+
+</script>
+
+</body>
+</html>
